@@ -579,7 +579,11 @@ function lbJukeboxApplyThemeStyles(overlay, theme) {
 
 function lbJukeboxCoverSrc(tape) {
     if (!tape) return '';
-    return tape.coverPath || tape.coverData || '';
+    let src = tape.coverPath || tape.coverData || '';
+    // Legacy tapes saved the old placeholder (a music-note glyph) as their cover data.
+    // Treat it as "no cover" so the plain-disc fallback renders instead.
+    if (src && src.startsWith('data:') && src.indexOf('M22%202c') !== -1) return '';
+    return src;
 }
 
 async function lbJukeboxPersistCover(dataUrl) {
@@ -604,7 +608,7 @@ async function lbJukeboxPersistAudioFile(file) {
     return res.path;
 }
 
-const LB_JUKEBOX_JEWEL_PLACEHOLDER = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><defs><radialGradient id="disc" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#484850"/><stop offset="72%" stop-color="#222228"/><stop offset="100%" stop-color="#101014"/></radialGradient></defs><circle cx="256" cy="256" r="248" fill="url(#disc)"/><circle cx="256" cy="256" r="248" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/><circle cx="256" cy="256" r="74" fill="rgba(0,0,0,0.5)"/><circle cx="256" cy="256" r="74" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/><circle cx="256" cy="256" r="14" fill="#0c0c10"/><g transform="translate(256 248) scale(2.4)" fill="rgba(255,255,255,0.62)"><path d="M22 2c-5.2 0-9.6 3-11.4 7.6-2 5.4-.4 11.4 4 14.6-3 1.6-5.4 4.6-6.6 8.4-2 6.8.2 14.2 5.8 18.4-1 6.4-1.4 12.6-.6 18.2 1 6.4 4.2 11.4 8.8 14.2-4 2.6-6.4 7-6.2 11.6.6 8.4 7.4 15 15.8 15 5.6 0 10.4-2.6 13.4-7 3-4.2 3.2-9.4.8-13.6-2.4-3.8-7-6.4-12.4-6.6 2.4-.4 4.6-1.6 6.4-3.4 3.4-3.4 5-8.2 4.6-13-5.6-2.8-9.6-8.4-10.4-14.8-.8-6.8 2-13.4 7.4-17.6 4-3.2 6.4-8 6.2-13-.8-7.4-7-13.2-14.4-13.2z"/></g></svg>');
+const LB_JUKEBOX_JEWEL_PLACEHOLDER = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><defs><radialGradient id="disc" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#484850"/><stop offset="72%" stop-color="#222228"/><stop offset="100%" stop-color="#101014"/></radialGradient></defs><circle cx="256" cy="256" r="248" fill="url(#disc)"/><circle cx="256" cy="256" r="248" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/><circle cx="256" cy="256" r="74" fill="rgba(0,0,0,0.5)"/><circle cx="256" cy="256" r="74" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/><circle cx="256" cy="256" r="14" fill="#0c0c10"/></svg>');
 
 function lbJukeboxCoverLabelRot(tape) {
     if (tape && tape.labelRot != null && tape.labelRot !== '') return parseFloat(tape.labelRot) || 0;
@@ -2225,10 +2229,6 @@ function lbJukeboxInitBoard(html, store, theme, saveStore) {
         });
     }
 
-    function defaultCoverData() {
-        return LB_JUKEBOX_JEWEL_PLACEHOLDER;
-    }
-
     function openBatchUploadModal(entries, onDone, onCancel) {
         setMenuMinimized(true);
         let draft = entries.map(e => Object.assign({ id: foundry.utils.randomID(), name: 'Untitled', audioPath: '', coverData: null, file: null }, e));
@@ -2312,7 +2312,6 @@ function lbJukeboxInitBoard(html, store, theme, saveStore) {
                             try { audioPath = await lbJukeboxPersistAudioFile(t.file); } catch (e) { continue; }
                         }
                         if (!audioPath) continue;
-                        if (!t.coverData) t.coverData = defaultCoverData();
                         await saveNewTape({
                             name: (t.name || '').trim() || 'Untitled Tape',
                             audioPath,
@@ -2341,7 +2340,6 @@ function lbJukeboxInitBoard(html, store, theme, saveStore) {
                     picked = true;
                     if (!path) { setMenuMinimized(false); resolve(false); return; }
                     flow.audioPath = path;
-                    if (!flow.coverData) flow.coverData = defaultCoverData();
                     await saveNewTape(flow, opts);
                     setMenuMinimized(false);
                     resolve(true);
@@ -2466,7 +2464,6 @@ function lbJukeboxInitBoard(html, store, theme, saveStore) {
                 if (!flow.audioPath && flow.audioFile) {
                     flow.audioPath = await lbJukeboxPersistAudioFileWithProgress(flow.audioFile, theme.id, overlay);
                 }
-                if (!flow.coverData) flow.coverData = defaultCoverData();
                 await saveNewTape(flow, { publish: false, silent: true });
             } catch (e) {
                 openUploadFlow();

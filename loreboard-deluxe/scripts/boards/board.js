@@ -17,6 +17,8 @@ function initLoreBoard(theme) {
         Object.values(ui.windows).filter(w => w.element && w.element.hasClass && w.element.hasClass('lb-fullscreen')).forEach(w => w.close());
         $('#lb-app-root').remove();
         $('body').removeClass('lb-board-open');
+        // No looping sound (print, paperspin, …) may survive a board (re-)mount.
+        if (window.lbStopAllLoopingSounds) window.lbStopAllLoopingSounds();
     } catch (e) {}
     
     // #1 Parallax themes (e.g. Galactic): the static backdrop is `theme.bg` (fixed, never transforms)
@@ -348,7 +350,7 @@ function initLoreBoard(theme) {
     #lb-af-reveal-blocker { position:fixed; inset:0; z-index:999998; background:#000 !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
     #lb-af-reveal-stage { position:fixed; inset:0; z-index:999999; pointer-events:none; perspective:1600px; perspective-origin:50% 50%; background:#000; }
     .lb-af-reveal-clone { position:fixed; left:50%; top:50%; z-index:999999; pointer-events:none; transform-style:preserve-3d; transform-origin:center center; backface-visibility:visible; }
-    .lb-af-reveal-clone.lb-af-reveal-spinning { animation:lb-af-reveal-carousel 3s linear forwards; }
+    .lb-af-reveal-clone.lb-af-reveal-spinning { animation:lb-af-reveal-carousel 1.5s linear forwards; } /* keep in sync with spinMs */
     .lb-af-reveal-clone.lb-af-reveal-vibrate { animation:lb-af-reveal-vibrate 0.55s ease-in-out 3; }
     .lb-af-reveal-clone.lb-af-reveal-name-only .lb-af-reveal-photo { display:none !important; }
     .lb-evidence-tag .lb-ev-text-field { border:none !important; outline:none !important; box-shadow:none !important; }
@@ -6697,7 +6699,11 @@ function initLoreBoard(theme) {
                 let imgWP = item.imgWPct !== undefined ? item.imgWPct : 100;
                 let imgHP = item.imgHPct !== undefined ? item.imgHPct : 100;
                 let inner = lbFramedImageInnerHTML(item, imgSrc, item.filter || 'none', item.panX || 0, item.panY || 0, item.scale || 1);
-                let iw = lbDocDisplayDims(item).w, ih = lbDocDisplayDims(item).h;
+                // Fixed viewBox from the ORIGINAL dims (same pattern as lbDocBakedViewDims for
+                // blueprints): the inner pan/mask math is computed in original-dim units, so the
+                // whole composition must scale as one constant graphic when the item is resized.
+                let vd = lbDocBakedViewDims(item);
+                let iw = vd.w, ih = vd.h;
                 return `<svg viewBox="0 0 ${iw} ${ih}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block;">
                     <foreignObject width="${iw}" height="${ih}"><div xmlns="http://www.w3.org/1999/xhtml" style="width:${iw}px;height:${ih}px;overflow:hidden;position:relative;">
                     <div class="lb-board-img-slot" style="position:absolute;left:${imgXP}%;top:${imgYP}%;width:${imgWP}%;height:${imgHP}%;overflow:hidden;box-sizing:border-box;">${inner}</div>
@@ -6873,7 +6879,7 @@ function initLoreBoard(theme) {
                             <div id="crop-frame" style="width:72%; height:72%; max-width:88%; position:relative; overflow:visible; border:none; background:transparent; box-shadow:0 0 0 4000px rgba(0,0,0,0.5); pointer-events:auto;">
                                 <div id="crop-paper-area" style="position:absolute; inset:${imgMode==='original'?'0':'20px'}; overflow:hidden; box-sizing:border-box; border:none; z-index:1; pointer-events:auto; cursor:grab;">
                                     <div id="crop-img-wrap" style="position:absolute; inset:0; overflow:hidden; z-index:1; pointer-events:none;">
-                                        <img id="crop-img" src="${imgSrc}" style="position:absolute; max-width:none; max-height:none; min-width:100%; min-height:100%; top:50%; left:50%; object-fit:cover; transform: translate(calc(-50% + ${currentPanX}px), calc(-50% + ${currentPanY}px)) scale(${currentScale}); transform-origin:center; filter:${initFilter}; pointer-events:none;">
+                                        <img id="crop-img" src="${imgSrc}" style="position:absolute; max-width:none; max-height:none; min-width:100%; min-height:100%; ${isBpEditorCrop ? 'width:100%; height:100%; ' : ''}top:50%; left:50%; object-fit:cover; transform: translate(calc(-50% + ${currentPanX}px), calc(-50% + ${currentPanY}px)) scale(${currentScale}); transform-origin:center; filter:${initFilter}; pointer-events:none;">
                                     </div>
                                 </div>
                                 <div id="crop-img-field" class="lb-rmf-preview-field lb-crop-img-field-wrap lb-crop-img-baked" style="position:absolute;inset:0;box-sizing:border-box;pointer-events:none;z-index:5;display:none;">${lbRMFHandlesHTML('crop')}</div>
@@ -6928,7 +6934,10 @@ function initLoreBoard(theme) {
                                 if (imgWrap) imgWrap.style.filter = '';
                                 if (img) {
                                     img.style.mixBlendMode = 'normal'; img.style.webkitMaskImage = ''; img.style.maskImage = ''; img.style.opacity = '';
-                                    img.style.width = ''; img.style.height = ''; img.style.left = '50%'; img.style.top = '50%';
+                                    // Blueprint field crop stays cover-fitted (width/height 100%) so the
+                                    // cropper zoom uses the SAME cover-relative scale as the field render.
+                                    img.style.width = isBpEditorCrop ? '100%' : ''; img.style.height = isBpEditorCrop ? '100%' : '';
+                                    img.style.left = '50%'; img.style.top = '50%';
                                     img.style.minWidth = '100%'; img.style.minHeight = '100%';
                                     let bf = (img.style.filter||'').replace(/sepia\([^)]*\)/g,'').replace(/saturate\([^)]*\)/g,'').replace(/contrast\([^)]*\)/g,'');
                                     img.style.filter = bf;
@@ -7357,6 +7366,14 @@ function initLoreBoard(theme) {
             window.lbOpenImageCropperDialog = openImageCropperDialog;
 
             function openUseBlueprintEditor(item) {
+                // Single-instance guard: one edit gesture can fire several open paths (the
+                // image-field `click` handler runs once per click of a double-click), and a
+                // second editor re-initializes the shared window.lbBP* globals — leaving one
+                // dialog populated and the other showing empty sheets.
+                if (window.lbBpEditorDialog) {
+                    try { window.lbBpEditorDialog.bringToTop(); } catch (e) {}
+                    return;
+                }
                 if (!store.blueprints) store.blueprints = [];
                 if (!item._placementDraft) lbEnsureEditorAttachVisible(item, theme.id, store);
                 if (lbIsFlippable(item)) {
@@ -8445,6 +8462,9 @@ function initLoreBoard(theme) {
                         }
                         return btns;
                     })(),
+                    close: () => {
+                        window.lbBpEditorDialog = null;
+                    },
                     render: (h) => {
                         window.lbBPGetBlueprints = function() { return lbGetAllBlueprints(store); };
                         window.lbBPSetBlueprints = function(bps) { store.blueprints = (bps || []).filter(function(b) { return b && b.id && !(window.lbIsDefaultBlueprintId && window.lbIsDefaultBlueprintId(b.id)); }); saveStore(); if (window.lbBPRefreshLoadDropdown) window.lbBPRefreshLoadDropdown(); };
@@ -8506,6 +8526,7 @@ function initLoreBoard(theme) {
                         }, 120);
                     }
                 }, { classes: ['dialog', 'lb-modern-dialog'], width: bpDialogWidth, zIndex: 100000 }).render(true);
+                window.lbBpEditorDialog = bpMainDialog;
                 window.lbBpEditorDialogEl = bpMainDialog.element && bpMainDialog.element[0] ? bpMainDialog.element[0] : window.lbBpEditorDialogEl || null;
             }
             window.openUseBlueprintEditor = openUseBlueprintEditor;
@@ -13097,6 +13118,8 @@ function initLoreBoard(theme) {
             };
 
             function lbAfRevealFinishFlyback(clone, pEl, rect) {
+                // Whatever path ends the reveal, the spin loop must never keep playing.
+                lbStopSound('paperspin');
                 clone.css({
                     transition: 'left 0.7s cubic-bezier(0.25,1,0.5,1), top 0.7s cubic-bezier(0.25,1,0.5,1), width 0.7s ease, height 0.7s ease, transform 0.7s cubic-bezier(0.25,1,0.5,1), opacity 0.4s ease',
                     left: rect.left + rect.width / 2 + 'px', top: rect.top + rect.height / 2 + 'px',
@@ -13138,6 +13161,11 @@ function initLoreBoard(theme) {
                 let pEl = document.getElementById(itemId);
                 if (!item || !pEl) return;
                 window.lbRevealPlaying = true;
+                // Re-trigger safety: a previous reveal's pending timers must not stop THIS
+                // run's spin sound or tear down its clone mid-flight.
+                (window.lbAfRevealTimers || []).forEach(clearTimeout);
+                window.lbAfRevealTimers = [];
+                lbStopSound('paperspin');
                 let rect = pEl.getBoundingClientRect();
                 $('#lb-af-reveal-blocker, #lb-af-reveal-stage, #lb-af-reveal-end-btn').remove();
                 $('body').append('<div id="lb-af-reveal-blocker"></div><div id="lb-af-reveal-stage"></div>');
@@ -13156,7 +13184,7 @@ function initLoreBoard(theme) {
                 let showPhoto = revealType === 'photo' || revealType === 'complete';
                 let showName = revealType === 'name' || revealType === 'complete';
                 let realImg = item.defaultImg || item.realImg || item.img || '';
-                let spinMs = 3000;
+                let spinMs = 1500; // keep in sync with the lb-af-reveal-spinning animation duration
                 let swapMs = Math.round(spinMs * 0.5);
                 if (showPhoto && realImg && revealType !== 'name') {
                     clone.find('.lb-af-photo').first().append(`<img class="lb-af-reveal-photo" src="${realImg}" style="filter:${item.filter || lbBuildImgFilterAdj(item)};">`);
@@ -13188,7 +13216,7 @@ function initLoreBoard(theme) {
                 lbPlaySound('paperspin', { loop: true, volume: 0.48 });
                 clone.addClass('lb-af-reveal-spinning');
                 requestAnimationFrame(function() {
-                    setTimeout(function() {
+                    window.lbAfRevealTimers.push(setTimeout(function() {
                         if (showPhoto && realImg) clone.find('.lb-af-reveal-photo').css('opacity', '1');
                         if (showName) {
                             let nameEl = clone.find('.lb-af-namestrip text, .lb-af-fullprint-name text').first();
@@ -13196,19 +13224,20 @@ function initLoreBoard(theme) {
                             if (nameEl.length) nameEl.text(finalName);
                         }
                         if (!gmGate) applyRevealState();
-                    }, swapMs);
-                    setTimeout(function() {
+                    }, swapMs));
+                    window.lbAfRevealTimers.push(setTimeout(function() {
+                        // Spin ends: stop the spin loop and fire the reveal sound at this exact moment.
                         lbStopSound('paperspin');
                         clone.removeClass('lb-af-reveal-spinning').addClass('lb-af-reveal-show');
                         lbPlaySound('reveal');
-                    }, spinMs);
-                    setTimeout(function() {
+                    }, spinMs));
+                    window.lbAfRevealTimers.push(setTimeout(function() {
                         if (gmGate) {
                             lbAfRevealShowEndGate(itemId, revealType, revealName, clone, pEl, rect, applyRevealState);
                         } else {
                             lbAfRevealFinishFlyback(clone, pEl, rect);
                         }
-                    }, spinMs + 1000);
+                    }, spinMs + 1000));
                 });
             };
 
@@ -14585,8 +14614,11 @@ function initLoreBoard(theme) {
                     if (window.lbPlacingSeal) {
                         if ($(e.target).closest('.lb-seal').length) return;
                         if (e.button === 0) {
-                            window.lbSealPlaceLMB = true;
-                            e.stopPropagation();
+                            // Place directly on pointerdown (same as stamps): a deferred `click`
+                            // never reaches .lb-item because document children (image fields,
+                            // text frames, baked embeds) swallow it with stopPropagation.
+                            e.stopPropagation(); e.preventDefault();
+                            lbPlaceSealOnItem(this, e.clientX, e.clientY);
                             return;
                         }
                         if (e.button === 2) {
@@ -14677,13 +14709,6 @@ function initLoreBoard(theme) {
                             if (!window.lbBulbMoved) { window.lbBulbRadiusMode = true; scrollArea.css('cursor', 'ew-resize'); }
                         }, 280);
                     }
-                });
-
-                items.on('click.sealplace', function(e) {
-                    if (!window.lbPlacingSeal || e.button !== 0) return;
-                    if ($(e.target).closest('.lb-seal').length) return;
-                    e.stopPropagation(); e.preventDefault();
-                    lbPlaceSealOnItem(this, e.clientX, e.clientY);
                 });
 
                 items.on('click.stampplace', function(e) {
@@ -15292,7 +15317,10 @@ function initLoreBoard(theme) {
                                 item.x = cl.x; item.y = cl.y;
                                 saveStore(); window.loadBoard(false);
                                 if (window.lbEmitStoreLive) window.lbEmitStoreLive('itemRot', { itemId: item.id, rot: item.rot || 0 });
-                                setTimeout(function() { draggingItem.removeClass('lb-drag-tilt-reset'); }, 400);
+                                // Capture the element locally: `draggingItem` is nulled synchronously below,
+                                // so the deferred callback must not read the shared variable.
+                                const tiltEl = draggingItem;
+                                setTimeout(function() { tiltEl.removeClass('lb-drag-tilt-reset'); }, 400);
                             }
                         }
                         draggingItem = null; drawThreads(); window.lbOverFolder = false;

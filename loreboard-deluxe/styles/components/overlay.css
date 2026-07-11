@@ -485,13 +485,17 @@
         color:#111 !important; -webkit-text-fill-color:#111 !important; background:rgba(65,105,225,0.38) !important;
     }
     .lb-bp-mod .lb-bp-mod-preview { display:none !important; }
+    /* Input FIELDS in dialogs sit on the dark #0f0f12 background (editor.css) — their text
+       must be white. Dark ink is reserved for contenteditable "paper" surfaces only. */
     .lb-modal-form input[type="text"], .lb-modal-form input[type="number"], .lb-modal-form textarea,
     .lb-ed input[type="text"], .lb-ed input[type="number"], .lb-ed textarea {
         user-select:text !important; -webkit-user-select:text !important; position:relative; z-index:2;
-        color:#111 !important; -webkit-text-fill-color:#111 !important;
+        color:#fff !important; -webkit-text-fill-color:#fff !important;
     }
     .lb-modal-form input::selection, .lb-modal-form textarea::selection,
-    .lb-ed input::selection, .lb-ed textarea::selection,
+    .lb-ed input::selection, .lb-ed textarea::selection {
+        color:#fff !important; -webkit-text-fill-color:#fff !important; background:rgba(65,105,225,0.55) !important;
+    }
     [contenteditable="true"]::selection, [contenteditable="true"] *::selection {
         color:#111 !important; -webkit-text-fill-color:#111 !important; background:rgba(65,105,225,0.38) !important;
     }

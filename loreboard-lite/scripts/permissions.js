@@ -465,7 +465,10 @@ function lbSerializeMasterState(st) {
         gmBoardPreloaded: st.gmBoardPreloaded
     };
 }
-// Shared board canvas only — excludes per-user UI (jukebox, settings, blueprints).
+// Shared board canvas only — excludes per-user UI (jukebox, settings).
+// Blueprints MUST travel with the sync state: clients (including the persisting GM)
+// replace their store from these payloads, so omitting blueprints here silently
+// dropped every saved blueprint on the next refresh/persist cycle.
 function lbSerializeBoardSyncState(st, opts) {
     opts = opts || {};
     if (!st) return {};
@@ -486,6 +489,7 @@ function lbSerializeBoardSyncState(st, opts) {
         workspaceBounds: st.workspaceBounds,
         mfFolders: st.mfFolders,
         languageSkills: st.languageSkills,
+        blueprints: st.blueprints,
         magicInkCustomEffects: st.magicInkCustomEffects
     };
     if (opts.includePlayerRoles && st.playerRoles) out.playerRoles = st.playerRoles;
@@ -504,6 +508,7 @@ function lbApplyBoardSyncPayload(store, p, opts) {
     if (p.workspaceBounds !== undefined) store.workspaceBounds = p.workspaceBounds;
     if (p.mfFolders) store.mfFolders = p.mfFolders;
     if (p.boardName !== undefined) store.boardName = p.boardName;
+    if (p.blueprints) store.blueprints = p.blueprints;
     if (p.magicInkCustomEffects) store.magicInkCustomEffects = p.magicInkCustomEffects;
     if (p.theme !== undefined) store.theme = p.theme;
     if (p.classic === false) lbClearClassicBoardFields(store);
@@ -919,7 +924,7 @@ function lbPlaySound(key, opts) {
     if (!src) return null;
     try {
         if (opts.loop && window.lbAudioPool[key]) {
-            window.lbAudioPool[key].pause();
+            try { window.lbAudioPool[key].loop = false; window.lbAudioPool[key].pause(); window.lbAudioPool[key].currentTime = 0; } catch (e) {}
             window.lbAudioPool[key] = null;
         }
         let a = new Audio(src);
@@ -954,9 +959,26 @@ function lbFadeOutSound(key, ms) {
     let fade = setInterval(() => {
         i++;
         a.volume = Math.max(0, vol * (1 - i / steps));
-        if (i >= steps) { clearInterval(fade); a.pause(); a.currentTime = 0; window.lbAudioPool[key] = null; }
+        if (i >= steps) {
+            clearInterval(fade);
+            try { a.loop = false; a.pause(); a.currentTime = 0; } catch (e) {}
+            // Only release the pool slot if it still holds THIS audio: overlapping
+            // play/fade cycles (e.g. two print-progress runs back to back) would
+            // otherwise orphan the newer looping sound with no handle to stop it.
+            if (window.lbAudioPool[key] === a) window.lbAudioPool[key] = null;
+        }
     }, 50);
 }
+function lbStopAllLoopingSounds() {
+    let pool = window.lbAudioPool || {};
+    Object.keys(pool).forEach(function(key) {
+        let a = pool[key];
+        if (!a) return;
+        try { a.loop = false; a.pause(); a.currentTime = 0; } catch (e) {}
+        pool[key] = null;
+    });
+}
+window.lbStopAllLoopingSounds = lbStopAllLoopingSounds;
 function lbStopSound(key) {
     let a = window.lbAudioPool[key];
     if (!a) return;

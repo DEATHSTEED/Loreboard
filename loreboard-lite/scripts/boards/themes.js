@@ -290,7 +290,7 @@ const LB_CREATE_BOARD_CATALOG = [
     {
         id: "custom",
         label: "Custom Board",
-        tierHtml: 'Loreboard DELUXE + Secret Code (<span class="lb-tier-gold">Patreon Gold Tier</span>)',
+        tierHtml: 'Loreboard DELUXE',
         type: "custom",
         boards: [
             {

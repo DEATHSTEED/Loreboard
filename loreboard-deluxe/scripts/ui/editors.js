@@ -897,7 +897,7 @@ function lbMagicInkEffectFilter(ink, uvTint) {
     let hue = ink.hue != null ? ink.hue : (ink.tint != null ? ink.tint : 0);
     let op = ink.opacity != null ? ink.opacity : 100;
     let ex = ink.exposure != null ? ink.exposure : 100;
-    return `brightness(${(b * ex / 100).toFixed(1)}%) contrast(${c}%) saturate(${s}%) hue-rotate(${hue}deg) opacity:${(op / 100).toFixed(2)}`;
+    return `brightness(${(b * ex / 100).toFixed(1)}%) contrast(${c}%) saturate(${s}%) hue-rotate(${hue}deg) opacity(${(op / 100).toFixed(2)})`;
 }
 function lbMagicInkEffectInnerHTML(ink, opts) {
     if (!ink || !ink.imgSrc) return '';
@@ -906,13 +906,15 @@ function lbMagicInkEffectInnerHTML(ink, opts) {
     let customFilter = lbMagicInkEffectFilter(ink, !!opts.uvTint);
     if (opts.uvTint) {
         let fid = 'lbPurpleInk_' + String(ink.id || foundry.utils.randomID()).replace(/[^a-zA-Z0-9_-]/g, '');
-        let inkPre = lbMagicInkEffectFilter(ink, false);
+        // UV reveal: the purple recolor must always win. A CSS filter in `style` overrides the
+        // SVG filter attribute, so the inline filter IS the purple tint (never the ink's own
+        // color adjustments); the feColorMatrix filter attribute stays as a fallback layer.
         return `<svg class="lb-inv-ink-effect-svg lb-magic-ink-tinted" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" width="100%" height="100%" style="display:block;pointer-events:none;overflow:visible;">
         <defs><filter id="${fid}" color-interpolation-filters="sRGB">
             <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0.78 0 0 0 0 0.08 0 0 0 0 1 0 0 0 1 0"/>
             <feComponentTransfer><feFuncR type="discrete" tableValues="0.78"/><feFuncG type="discrete" tableValues="0.08"/><feFuncB type="discrete" tableValues="1"/></feComponentTransfer>
         </filter></defs>
-        <image class="lb-inv-ink-effect" href="${src}" xlink:href="${src}" width="100" height="100" preserveAspectRatio="xMidYMid meet" filter="url(#${fid})" style="mix-blend-mode:normal;opacity:1;filter:${inkPre};"/>
+        <image class="lb-inv-ink-effect" href="${src}" xlink:href="${src}" width="100" height="100" preserveAspectRatio="xMidYMid meet" filter="url(#${fid})" style="mix-blend-mode:normal;opacity:1;filter:${LB_MAGIC_INK_PURPLE_CSS_FILTER};"/>
     </svg>`;
     }
     return `<img class="lb-inv-ink-effect lb-inv-ink-effect-plain" src="${src}" alt="" style="width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;border:none;background:transparent;filter:${customFilter};">`;

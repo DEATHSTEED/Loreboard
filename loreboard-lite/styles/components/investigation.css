@@ -101,9 +101,12 @@
     .lb-inv-ink-marker.lb-inv-ink-effect-uv .lb-inv-ink-effect-svg image { opacity:1 !important; visibility:visible !important; filter:brightness(118%) contrast(122%) saturate(240%) hue-rotate(278deg) !important; mix-blend-mode:color !important; }
     .lb-inv-ink-marker.lb-inv-ink-uv-glow .lb-inv-ink-text { opacity:1 !important; visibility:visible !important; color:#f3e8ff !important; text-shadow:0 0 8px #e9d5ff,0 0 16px #c77dff,0 0 28px rgba(155,48,255,0.8) !important; background:transparent !important; border:none !important; }
     .lb-inv-ink-marker.lb-inv-ink-uv-glow .lb-inv-ink-effect,
-    .lb-inv-ink-marker.lb-inv-ink-uv-glow .lb-inv-ink-effect-svg { opacity:1 !important; visibility:visible !important; background:transparent !important; box-shadow:none !important; filter:none !important; }
+    .lb-inv-ink-marker.lb-inv-ink-uv-glow .lb-inv-ink-effect-svg { opacity:1 !important; visibility:visible !important; background:transparent !important; box-shadow:none !important; }
+    /* UV-revealed effect graphics must NEVER show their original colors — force the
+       canonical magic-ink purple recolor (same as LB_MAGIC_INK_PURPLE_CSS_FILTER). */
     .lb-inv-ink-marker.lb-inv-ink-uv-glow .lb-inv-ink-effect-svg image,
-    .lb-inv-ink-marker.lb-inv-ink-uv-glow .lb-inv-ink-effect img { filter:brightness(1.1) drop-shadow(0 0 6px rgba(155,48,255,0.35)) !important; }
+    .lb-inv-ink-marker.lb-inv-ink-uv-glow img.lb-inv-ink-effect-plain,
+    .lb-inv-ink-marker.lb-inv-ink-uv-glow .lb-inv-ink-effect img { filter:brightness(0) saturate(100%) invert(18%) sepia(99%) saturate(7500%) hue-rotate(271deg) brightness(95%) contrast(101%) drop-shadow(0 0 6px rgba(155,48,255,0.35)) !important; }
     .lb-inv-ink-marker.lb-inv-ink-editing { outline:2px solid rgba(199,125,255,0.9) !important; outline-offset:2px; border-radius:3px; box-shadow:0 0 14px rgba(155,48,255,0.45), inset 0 0 8px rgba(155,48,255,0.15) !important; }
     body.lb-inv-uv-active .lb-inv-ink-marker .lb-rte-handle,
     body.lb-inv-uv-active .lb-inv-ink-marker.lb-inv-ink-hover,
@@ -112,6 +115,7 @@
     .lb-inv-magic-ink-editor #inv-ink-rte,
     .lb-inv-magic-ink-editor #inv-ink-rte * { color:#ffffff !important; caret-color:#ffffff !important; }
     .lb-inv-magic-ink-editor .lb-inv-magic-ink-rte-wrap { border:1px solid rgba(155,48,255,0.55) !important; }
+    .lb-inv-magic-ink-rte-wrap { max-width:100%; min-width:0; box-sizing:border-box; overflow:hidden; }
     .lb-inv-ink-marker .lb-inv-ink-text { background:transparent !important; border:none !important; }
     .lb-inv-ink-marker .lb-rte-handle { pointer-events:auto; }
     body.lb-inv-uv-light-on .lb-inv-ink-marker { visibility:visible !important; pointer-events:none !important; background:transparent !important; border:none !important; outline:none !important; box-shadow:none !important; }

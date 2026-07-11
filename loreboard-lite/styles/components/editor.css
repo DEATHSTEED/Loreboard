@@ -207,6 +207,13 @@
         padding:6px 30px 6px 11px; text-overflow:ellipsis; white-space:nowrap;
         min-width:120px; max-width:100%; width:100%; }
     .lb-modern-dialog textarea { height:auto; }
+    /* Inputs written without a type attribute (or with other text-like types) miss the
+       [type=text]/[type=number] selectors above and would fall back to browser-default
+       black on the dark field background — force readable white on all of them. */
+    .lb-modern-dialog input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]):not([type=image]),
+    .lb-modal-form input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]):not([type=image]),
+    .lb-modern-dialog textarea, .lb-modal-form textarea {
+        color:#fff !important; -webkit-text-fill-color:#fff !important; caret-color:#fff; }
     /* Inline selects (font / paper pickers placed in a flex row) size to their own content but never clip. */
     .lb-modern-dialog select.lb-font-select-inline, .lb-ed select.lb-font-select-inline,
     .lb-modern-dialog select.lb-paper-select-inline, .lb-ed select.lb-paper-select-inline,
@@ -231,7 +238,10 @@
     .lb-rte-btn:hover { border-color:var(--lb-accent,#d4af37); background:#30303a; }
     .lb-rte-btn b, .lb-rte-btn i, .lb-rte-btn u, .lb-rte-btn s { font-style:normal; pointer-events:none; }
     .lb-rte-btn i { font-style:italic; } .lb-rte-btn u { text-decoration:underline; } .lb-rte-btn s { text-decoration:line-through; }
-    .lb-rte-area { background:#0f0f12; color:#fff; border:1px solid #3a3a44; border-radius:8px; padding:8px 10px; font-size:13px; outline:none; overflow:auto; box-sizing:border-box; }
+    /* Width-bound + wrapping: an unconstrained contenteditable grows to its content's
+       intrinsic width (one endless line stretching the dialog) instead of wrapping. */
+    .lb-rte-area { background:#0f0f12; color:#fff; border:1px solid #3a3a44; border-radius:8px; padding:8px 10px; font-size:13px; outline:none; overflow:auto; box-sizing:border-box;
+        width:100%; max-width:100%; min-width:0; white-space:pre-wrap; overflow-wrap:break-word; word-break:break-word; }
     .lb-rte-area:focus { border-color:var(--lb-accent,#d4af37); box-shadow:0 0 0 2px rgba(212,175,55,0.18); }
     .lb-rte-area:empty:before { content:attr(data-ph); color:#7a7a85; pointer-events:none; }
 

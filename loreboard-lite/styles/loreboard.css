@@ -1,3 +1,0 @@
-/* LOREBOARD global shell â€” theme-specific rules injected at runtime in board.js */
-html.lb-board-open, body.lb-board-open { overflow: hidden !important; width: 100% !important; height: 100% !important; }
-.lb-glass.window-app { background: transparent !important; box-shadow: none !important; border: none !important; }

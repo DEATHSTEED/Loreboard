@@ -1,0 +1,60 @@
+{
+  "id": "loreboard",
+  "title": "Loreboard",
+  "description": "Immersive investigation board for Foundry VTT — classic and cinematic themed boards, jukebox ambience, UV lamp secrets, cipher languages and custom board uploads.",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "DeathSteed",
+      "url": "https://github.com/DEATHSTEED/DEATHSTEED"
+    }
+  ],
+  "compatibility": {
+    "minimum": "12",
+    "verified": "13",
+    "maximum": "14"
+  },
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "scripts": [
+    "scripts/config.js",
+    "scripts/permissions.js",
+    "scripts/utils/utilities.js",
+    "scripts/boards/themes.js",
+    "scripts/features/jukebox.js",
+    "scripts/boards/board-tweaks.js",
+    "scripts/ui/editors.js",
+    "scripts/ui/eye.js",
+    "scripts/ui/start-menu.js",
+    "scripts/boards/board.js",
+    "scripts/utils/fonts.js"
+  ],
+  "styles": [
+    "styles/fonts.css",
+    "styles/components/language.css",
+    "styles/components/editor.css",
+    "styles/components/overlay.css",
+    "styles/components/investigation.css",
+    "styles/components/eye.css",
+    "styles/components/scene-controls.css",
+    "styles/loreboard.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json" 
+    }
+  ],
+  "socket": true,
+  "relationships": {},
+  "url": "https://github.com/DEATHSTEED/LOREBOARD",
+  "manifest": "https://raw.githubusercontent.com/DEATHSTEED/LOREBOARD/main/loreboard/module.json",
+  "download": "https://github.com/DEATHSTEED/LOREBOARD/releases/latest/download/loreboard.zip",
+  "flags": {
+    "forge-vtt": {
+      "manifest": "https://raw.githubusercontent.com/DEATHSTEED/LOREBOARD/main/loreboard/module.json"
+    }
+  }
+}

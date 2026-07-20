@@ -1,22 +1,6 @@
 'use strict';
 // LOREBOARD - Floating eye and UI shell
 
-// ===========================================================================
-// FLOATING EYE SYSTEM — rig (blink/gaze/hover), menu companion (anchor/roam/proximity)
-// Naming: the animated eye entity is always referred to as EYE in code.
-// Visual design reuses lbRadialEyeHTML(); only behaviour & scale differ by mode.
-// ===========================================================================
-const LB_EYE_SCALE_BASE_INV = 0.282;
-const LB_EYE_SCALE_INVESTIGATION = LB_EYE_SCALE_BASE_INV * 1.3;
-const LB_EYE_SCALE_MENU = LB_EYE_SCALE_INVESTIGATION * 2;
-const LB_EYE_DISPLAY_INVESTIGATION = Math.round(78 * 1.3);
-const LB_EYE_DISPLAY_MENU = LB_EYE_DISPLAY_INVESTIGATION * 2;
-const LB_EYE_DISPLAY_LOGO = 54;
-const LB_EYE_SCALE_LOGO = LB_EYE_SCALE_MENU * (LB_EYE_DISPLAY_LOGO / LB_EYE_DISPLAY_MENU);
-const LB_EYE_HD_SUPERSAMPLE = 2;
-const LB_EYE_INTERNAL_PX = 276 * LB_EYE_HD_SUPERSAMPLE;
-const LB_EYE_INV_HOVER_SCALE = 2.0;
-
 function lbEyeHTML() { return lbRadialEyeHTML(); }
 
 function lbEyeSpawnPop(clientX, clientY, color, count) {

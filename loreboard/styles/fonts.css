@@ -1,16 +1,76 @@
 /* LOREBOARD - 15 bundled Foreign Fonts */
-@font-face{font-family:'LB Alien';src:url('../fonts/Alien-vRx4.ttf') format('truetype');font-display:swap;}
-@font-face{font-family:'Anglo-Saxon Runes';src:url('../fonts/AnglosaxonRunes-VGne.ttf') format('truetype');font-display:swap;}
-@font-face{font-family:'Cirnaja Bookhand';src:url('../fonts/CirnajaBookhand-rgWy.ttf') format('truetype');font-display:swap;}
-@font-face{font-family:'Csenge';src:url('../fonts/Csenge-XGoa.ttf') format('truetype');font-display:swap;}
-@font-face{font-family:'Drachenklaue';src:url('../fonts/LswDrachenklaueRegular-olYV.ttf') format('truetype');font-display:swap;}
-@font-face{font-family:'Mage Script';src:url('../fonts/MageScriptBold-2BKW.ttf') format('truetype');font-display:swap;}
-@font-face{font-family:'Maximal Text';src:url('../fonts/MaximalText-q3Y6.ttf') format('truetype');font-display:swap;}
-@font-face{font-family:'Mk Runes Light';src:url('../fonts/MkrunesLight-WozY.ttf') format('truetype');font-display:swap;}
-@font-face{font-family:'Modern Cybertronic';src:url('../fonts/ModernCybertronic-ge8P.ttf') format('truetype');font-display:swap;}
-@font-face{font-family:'Modern Runes';src:url('../fonts/Modernrunes-KJ3A.ttf') format('truetype');font-display:swap;}
-@font-face{font-family:'Ophidean Runes';src:url('../fonts/OphideanRunes-1naL.ttf') format('truetype');font-display:swap;}
-@font-face{font-family:'Runar';src:url('../fonts/Runar-AR7m.ttf') format('truetype');font-display:swap;}
-@font-face{font-family:'SGA Smooth';src:url('../fonts/SgaSmoothRegular-DO0Y3.ttf') format('truetype');font-display:swap;}
-@font-face{font-family:'Tengwar Optime';src:url('../fonts/Tengwaroptime-glYP.ttf') format('truetype');font-display:swap;}
-@font-face{font-family:'Wyverns Soul';src:url('../fonts/WyvernsSoulSocietyMedium-GnKD.ttf') format('truetype');font-display:swap;}
+@font-face {
+  font-family: "LB Alien";
+  src: url("../fonts/Alien-vRx4.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Anglo-Saxon Runes";
+  src: url("../fonts/AnglosaxonRunes-VGne.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Cirnaja Bookhand";
+  src: url("../fonts/CirnajaBookhand-rgWy.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Csenge";
+  src: url("../fonts/Csenge-XGoa.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Drachenklaue";
+  src: url("../fonts/LswDrachenklaueRegular-olYV.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Mage Script";
+  src: url("../fonts/MageScriptBold-2BKW.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Maximal Text";
+  src: url("../fonts/MaximalText-q3Y6.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Mk Runes Light";
+  src: url("../fonts/MkrunesLight-WozY.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Modern Cybertronic";
+  src: url("../fonts/ModernCybertronic-ge8P.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Modern Runes";
+  src: url("../fonts/Modernrunes-KJ3A.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Ophidean Runes";
+  src: url("../fonts/OphideanRunes-1naL.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Runar";
+  src: url("../fonts/Runar-AR7m.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "SGA Smooth";
+  src: url("../fonts/SgaSmoothRegular-DO0Y3.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Tengwar Optime";
+  src: url("../fonts/Tengwaroptime-glYP.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Wyverns Soul";
+  src: url("../fonts/WyvernsSoulSocietyMedium-GnKD.ttf") format("truetype");
+  font-display: swap;
+}

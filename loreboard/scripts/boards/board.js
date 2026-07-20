@@ -4475,26 +4475,45 @@ function initLoreBoard(theme) {
                     </div>`,
                     buttons: {
                         save: { label: "<i class='fas fa-check'></i> Save", callback: (dHtml) => {
-                            existingInk.bright = parseInt(dHtml.find('#mfx-bright').val(), 10) || 100;
-                            existingInk.cont = parseInt(dHtml.find('#mfx-cont').val(), 10) || 100;
-                            existingInk.sat = parseInt(dHtml.find('#mfx-sat').val(), 10) || 100;
-                            existingInk.exposure = parseInt(dHtml.find('#mfx-exp').val(), 10) || 100;
-                            existingInk.hue = parseInt(dHtml.find('#mfx-hue').val(), 10) || 0;
-                            existingInk.tint = existingInk.hue;
-                            existingInk.opacity = parseInt(dHtml.find('#mfx-op').val(), 10) || 100;
                             let parentItem = lbInvParentItem();
                             if (!parentItem) return;
-                            lbSaveInkOnItemFace(parentItem, lbInvCurrentInspectFace(), existingInk, true);
+                            let faceSide = lbInvCurrentInspectFace();
+                            let inks = lbInksForFace(parentItem, faceSide);
+                            let targetInk = inks.find(i => i.id === existingInk.id);
+                            if (targetInk) {
+                                targetInk.bright = parseInt(dHtml.find('#mfx-bright').val(), 10) || 100;
+                                targetInk.cont = parseInt(dHtml.find('#mfx-cont').val(), 10) || 100;
+                                targetInk.sat = parseInt(dHtml.find('#mfx-sat').val(), 10) || 100;
+                                targetInk.exposure = parseInt(dHtml.find('#mfx-exp').val(), 10) || 100;
+                                targetInk.hue = parseInt(dHtml.find('#mfx-hue').val(), 10) || 0;
+                                targetInk.tint = targetInk.hue;
+                                targetInk.opacity = parseInt(dHtml.find('#mfx-op').val(), 10) || 100;
+                                lbSaveInkOnItemFace(parentItem, faceSide, targetInk, true);
+                            } else {
+                                existingInk.bright = parseInt(dHtml.find('#mfx-bright').val(), 10) || 100;
+                                existingInk.cont = parseInt(dHtml.find('#mfx-cont').val(), 10) || 100;
+                                existingInk.sat = parseInt(dHtml.find('#mfx-sat').val(), 10) || 100;
+                                existingInk.exposure = parseInt(dHtml.find('#mfx-exp').val(), 10) || 100;
+                                existingInk.hue = parseInt(dHtml.find('#mfx-hue').val(), 10) || 0;
+                                existingInk.tint = existingInk.hue;
+                                existingInk.opacity = parseInt(dHtml.find('#mfx-op').val(), 10) || 100;
+                                lbSaveInkOnItemFace(parentItem, faceSide, existingInk, true);
+                            }
                             saveStore();
-                            if (invInspectEl) lbRenderInspectSecrets(invInspectEl, invInspectId);
-                            if (invUvLampActive) lbSyncUvInkLayer();
+                            setTimeout(() => {
+                                if (invInspectEl) lbRenderInspectSecrets(invInspectEl, invInspectId);
+                                lbSyncUvInkLayer();
+                            }, 0);
                         }},
                         delete: { label: "<i class='fas fa-trash'></i> Delete", callback: () => {
                             let parentItem = lbInvParentItem();
                             if (!parentItem) return;
                             lbRemoveInkFromItemFace(parentItem, lbInvCurrentInspectFace(), existingInk.id);
                             saveStore();
-                            if (invInspectEl) lbRenderInspectSecrets(invInspectEl, invInspectId);
+                            setTimeout(() => {
+                                if (invInspectEl) lbRenderInspectSecrets(invInspectEl, invInspectId);
+                                lbSyncUvInkLayer();
+                            }, 0);
                         }}
                     },
                     render: (h) => {
@@ -4521,7 +4540,7 @@ function initLoreBoard(theme) {
                                     if (img) img.style.filter = filt;
                                 }
                             }
-                            if (invUvLampActive) lbSyncUvInkLayer();
+                            lbSyncUvInkLayer();
                         }
                         h.find('input[type=range]').on('input', function() {
                             h.find('#' + this.id + '-val').text(this.value);
@@ -4546,14 +4565,25 @@ function initLoreBoard(theme) {
                     </div>`,
                     buttons: {
                         save: { label: "<i class='fas fa-check'></i> Save", callback: (dHtml) => {
-                            existingInk.fontFamily = lbResolveFontPickerValue(dHtml.find('#mink-font').val() || 'Special Elite', store).font;
-                            existingInk.fontSize = parseInt(dHtml.find('#mink-size').val(), 10) || 18;
                             let parentItem = lbInvParentItem();
                             if (!parentItem) return;
-                            lbSaveInkOnItemFace(parentItem, lbInvCurrentInspectFace(), existingInk, true);
+                            let faceSide = lbInvCurrentInspectFace();
+                            let inks = lbInksForFace(parentItem, faceSide);
+                            let targetInk = inks.find(i => i.id === existingInk.id);
+                            if (targetInk) {
+                                targetInk.fontFamily = lbResolveFontPickerValue(dHtml.find('#mink-font').val() || 'Special Elite', store).font;
+                                targetInk.fontSize = parseInt(dHtml.find('#mink-size').val(), 10) || 18;
+                                lbSaveInkOnItemFace(parentItem, faceSide, targetInk, true);
+                            } else {
+                                existingInk.fontFamily = lbResolveFontPickerValue(dHtml.find('#mink-font').val() || 'Special Elite', store).font;
+                                existingInk.fontSize = parseInt(dHtml.find('#mink-size').val(), 10) || 18;
+                                lbSaveInkOnItemFace(parentItem, faceSide, existingInk, true);
+                            }
                             saveStore();
-                            if (invInspectEl) lbRenderInspectSecrets(invInspectEl, invInspectId);
-                            if (invUvLampActive) lbSyncUvInkLayer();
+                            setTimeout(() => {
+                                if (invInspectEl) lbRenderInspectSecrets(invInspectEl, invInspectId);
+                                lbSyncUvInkLayer();
+                            }, 0);
                         }},
                         edit: { label: "<i class='fas fa-pen'></i> Edit Content", callback: () => {
                             lbOpenInvisibleInkEditor({
@@ -7088,6 +7118,7 @@ function initLoreBoard(theme) {
                             if(st==='invert') f+=' invert(100%)';
                             window.lbCropAdj={bright:b,cont:c,sat:s,exposure:ex,tint:t,style:st};
                             img.style.filter=f;
+                            applyImgMode();
                         }
                         window.lbCropAdj={bright:${aBright},cont:${aCont},sat:${aSat},exposure:${aExp},tint:${aTint},style:'${aStyle}'};
                         ['adj-bright','adj-cont','adj-sat','adj-exp','adj-tint','crop-style'].forEach(function(idd){ let el=document.getElementById(idd); if(el){ el.addEventListener('input', lbFilt); el.addEventListener('change', lbFilt);} });
@@ -7278,16 +7309,34 @@ function initLoreBoard(theme) {
                     },
                     buttons: {
                         print: { label: existingItem && existingItem.blueprintMod ? "<i class='fas fa-check'></i> Apply" : (existingItem && existingItem.type ? "<i class='fas fa-save'></i> Save Changes" : (isSecretCrop ? "<i class='fas fa-check'></i> Place Secret" : "<i class='fas fa-print'></i> Print & Place")), callback: (html) => {
+                            let adj = {
+                                bright: html.find('#adj-bright').length ? (parseInt(html.find('#adj-bright').val(), 10) || 100) : (window.lbCropAdj?.bright || aBright),
+                                cont: html.find('#adj-cont').length ? (parseInt(html.find('#adj-cont').val(), 10) || 100) : (window.lbCropAdj?.cont || aCont),
+                                sat: html.find('#adj-sat').length ? (parseInt(html.find('#adj-sat').val(), 10) || 100) : (window.lbCropAdj?.sat || aSat),
+                                exposure: html.find('#adj-exp').length ? (parseInt(html.find('#adj-exp').val(), 10) || 100) : (window.lbCropAdj?.exposure || aExp),
+                                tint: html.find('#adj-tint').length ? (parseInt(html.find('#adj-tint').val(), 10) || 0) : (window.lbCropAdj?.tint || aTint),
+                                style: html.find('#crop-style').length ? (html.find('#crop-style').val() || 'none') : (window.lbCropAdj?.style || aStyle)
+                            };
+                            let filter = buildImgFilter(adj);
+                            let fx = {
+                                fade: html.find('#crop-fade').length ? (parseInt(html.find('#crop-fade').val(), 10) !== undefined ? parseInt(html.find('#crop-fade').val(), 10) : 35) : (window.lbCropPaperFx?.fade || pFade),
+                                soft: html.find('#crop-soft').length ? (parseInt(html.find('#crop-soft').val(), 10) !== undefined ? parseInt(html.find('#crop-soft').val(), 10) : 0) : (window.lbCropPaperFx?.soft || pSoft),
+                                print: html.find('#crop-print').length ? (parseInt(html.find('#crop-print').val(), 10) !== undefined ? parseInt(html.find('#crop-print').val(), 10) : 50) : (window.lbCropPaperFx?.print || pPrint),
+                                paint: html.find('#crop-paint').length ? (parseInt(html.find('#crop-paint').val(), 10) !== undefined ? parseInt(html.find('#crop-paint').val(), 10) : 0) : (window.lbCropPaperFx?.paint || pPaint),
+                                brush: html.find('#crop-brush').length ? (parseInt(html.find('#crop-brush').val(), 10) !== undefined ? parseInt(html.find('#crop-brush').val(), 10) : 0) : (window.lbCropPaperFx?.brush || pBrush)
+                            };
+                            let paper = html.find('#crop-paper-picker').val() || html.find('#crop-paper-picker-dup').val() || window.lbCropPaper || curPaper;
+                            let isTr = paper === 'transparent';
+                            let imgModeVal = html.find('#crop-img-mode').length ? (html.find('#crop-img-mode').val() || imgMode) : (window.lbCropImgMode || imgMode);
+                            if (imgModeVal === 'original') { paper = 'transparent'; isTr = true; }
+
                             if (existingItem && existingItem.onMagicInkPlace) {
-                                let adj = window.lbCropAdj || { bright:aBright, cont:aCont, sat:aSat, exposure:aExp, tint:aTint, style:aStyle };
-                                let filter = buildImgFilter(adj);
                                 existingItem.onMagicInkPlace(imgSrc, Object.assign({}, adj, { filter: filter }));
                                 return true;
                             }
                             if (existingItem && existingItem.blueprintMod && existingItem.onBlueprintSave) {
                                 let mod = existingItem.blueprintMod;
-                                let adj = window.lbCropAdj || { bright:aBright, cont:aCont, sat:aSat, exposure:aExp, tint:aTint, style:aStyle };
-                                mod.filter = buildImgFilter(adj);
+                                mod.filter = filter;
                                 mod.bright = adj.bright; mod.cont = adj.cont; mod.sat = adj.sat; mod.exposure = adj.exposure; mod.tint = adj.tint; mod.style = adj.style;
                                 mod.scale = window.lbCropScale !== undefined ? window.lbCropScale : currentScale;
                                 mod.panX = window.lbCropPanX !== undefined ? window.lbCropPanX : currentPanX;
@@ -7324,14 +7373,8 @@ function initLoreBoard(theme) {
                             w = boardDims.w;
                             h = boardDims.h;
                             html.find('#crop-frame').data('w', editorW).data('h', editorH).data('r', aspect);
-                            let paper = window.lbCropPaper || curPaper;
-                            let isTr = paper === 'transparent';
                             let parsedAttach = lbParseAttachSelect(html.find('#crop-attach').val() || lbDefaultAttachType('framed-image', theme.id, store), theme.id, store);
                             let aType = lbSanitizeAttachType(parsedAttach.type, theme.id, store);
-                            let adj = window.lbCropAdj || { bright:aBright, cont:aCont, sat:aSat, exposure:aExp, tint:aTint, style:aStyle };
-                            let filter = buildImgFilter(adj);
-                            let fx = window.lbCropPaperFx || {fade:pFade,soft:pSoft,print:pPrint,paint:pPaint,brush:pBrush};
-                            let imgModeVal = window.lbCropImgMode || imgMode;
                             // 'Original' mode disables paper entirely — document equals the crop frame exactly.
                             if (imgModeVal === 'original') { paper = 'transparent'; isTr = true; }
                             
@@ -12125,6 +12168,10 @@ function initLoreBoard(theme) {
                     let prevStored = (store.items || []).filter(i => i.stored).map(i => i.id).sort().join('|');
                     let prevTheme = store.theme;
                     let prevClassic = !!store.classic;
+                    let prevTweaksSig = JSON.stringify(store.boardTweaks || {});
+                    let prevItemsSig = lbStoreItemsSig(store);
+                    let prevDrawingsSig = JSON.stringify(store.drawings || []);
+                    let prevThreadsSig = JSON.stringify(store.threads || []);
                     lbApplyBoardSyncPayload(store, p, { fromUserId: data.userId, allowPlayerRoles: !!game.user?.isGM });
                     if (_refreshRev != null) store.revision = Math.max(store.revision || 0, _refreshRev);
                     window.lbCurrentStore = store;
@@ -12135,11 +12182,23 @@ function initLoreBoard(theme) {
                     }
                     let nextOnBoard = (store.items || []).filter(i => !i.stored).map(i => i.id).sort().join('|');
                     let nextStored = (store.items || []).filter(i => i.stored).map(i => i.id).sort().join('|');
+                    let tweaksSig = JSON.stringify(store.boardTweaks || {});
+                    let itemsSig = lbStoreItemsSig(store);
+                    let drawingsSig = JSON.stringify(store.drawings || []);
+                    let threadsSig = JSON.stringify(store.threads || []);
+                    let needsFullRefresh =
+                        prevOnBoard !== nextOnBoard ||
+                        prevStored !== nextStored ||
+                        prevTweaksSig !== tweaksSig ||
+                        prevItemsSig !== itemsSig ||
+                        prevDrawingsSig !== drawingsSig ||
+                        prevThreadsSig !== threadsSig;
                     let busy = window.lbBoardIsBusy();
                     if (busy) {
+                        if (needsFullRefresh) window.lbPendingBoardRefresh = true;
                         if (typeof window.drawThreads === 'function') window.drawThreads();
                         if (typeof window.lbRenderAttachLayer === 'function') window.lbRenderAttachLayer();
-                    } else if (prevOnBoard !== nextOnBoard || prevStored !== nextStored) {
+                    } else if (needsFullRefresh) {
                         if (typeof window.loadBoard === 'function') window.loadBoard(false);
                     } else {
                         (store.items || []).forEach(function(item) {
@@ -12162,6 +12221,24 @@ function initLoreBoard(theme) {
                     if (typeof window.lbApplyPermissionReactiveUI === 'function') window.lbApplyPermissionReactiveUI();
                 }
             };
+
+            function lbStoreItemsSig(s) {
+                try {
+                    return JSON.stringify((s.items || []).map(it => it && ({
+                        id: it.id, type: it.type, stored: !!it.stored,
+                        x: it.x, y: it.y, w: it.w, h: it.h, rot: it.rot, z: it.z,
+                        text: it.text, richText: it.richText, name: it.name,
+                        customImg: it.customImg, faces: it.faces,
+                        filter: it.filter, imgFilter: it.imgFilter,
+                        bright: it.bright, cont: it.cont, sat: it.sat, exposure: it.exposure, tint: it.tint, style: it.style,
+                        paper: it.paper, imgMode: it.imgMode, paperFade: it.paperFade, paperSoft: it.paperSoft, paperPrint: it.paperPrint, paperPaint: it.paperPaint, paperBrush: it.paperBrush,
+                        scale: it.scale, panX: it.panX, panY: it.panY, panFracX: it.panFracX, panFracY: it.panFracY,
+                        frameStyle: it.frameStyle, frameBorderColor: it.frameBorderColor, frameBorderWidth: it.frameBorderWidth, fullFeather: it.fullFeather,
+                        flipped: !!it.flipped, faceSide: it.faceSide,
+                        isGM: !!it.isGM, ownerId: it.ownerId
+                    })));
+                } catch (e) { return ''; }
+            }
 
             $(document).on('pointermove.preview', function(e) {
                 window.lbLastPointerX = e.clientX;

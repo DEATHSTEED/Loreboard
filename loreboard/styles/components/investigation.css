@@ -633,7 +633,12 @@ body.lb-inv-uv-light-on .lb-inv-ink-marker.lb-inv-ink-uv-lit {
 .lb-uv-ink-clone .lb-uv-ink-effect-plain,
 .lb-uv-ink-clone .lb-uv-ink-visible-effect image,
 .lb-uv-ink-clone .lb-uv-ink-visible-effect img {
-  filter: brightness(1.85) sepia(1) hue-rotate(258deg) saturate(3)
+  /* Canonical magic-ink purple recolor (same as LB_MAGIC_INK_PURPLE_CSS_FILTER):
+     brightness(0) fully neutralizes the source so an edited/colored effect
+     graphic can NEVER keep its original color under the UV lamp — it is
+     rebuilt as pure UV purple, then given the glowing drop-shadows. */
+  filter: brightness(0) saturate(100%) invert(18%) sepia(99%) saturate(7500%)
+    hue-rotate(271deg) brightness(95%) contrast(101%)
     drop-shadow(0 0 8px #c77dff) drop-shadow(0 0 18px #a855f7)
     drop-shadow(0 0 32px rgba(124, 58, 237, 0.92)) !important;
 }

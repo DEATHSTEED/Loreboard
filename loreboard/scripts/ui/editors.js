@@ -30,22 +30,22 @@ function lbMaximizeFilePickerForUpload(fp) {
         try {
             let root = html[0].closest('.app') || html[0];
             requestAnimationFrame(() => {
-                root.style.setProperty('position', 'fixed', 'important');
-                root.style.setProperty('top', '50%', 'important');
-                root.style.setProperty('left', '50%', 'important');
-                root.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
-                root.style.setProperty('width', 'min(92vw, 960px)', 'important');
-                root.style.setProperty('height', 'min(88vh, 720px)', 'important');
-                root.style.setProperty('max-width', '96vw', 'important');
-                root.style.setProperty('max-height', '92vh', 'important');
+                let w = Math.min(window.innerWidth * 0.92, 960);
+                let h = Math.min(window.innerHeight * 0.88, 720);
+                app.setPosition({
+                    width: w,
+                    height: h,
+                    left: (window.innerWidth - w) / 2,
+                    top: (window.innerHeight - h) / 2
+                });
                 root.style.setProperty('z-index', '10000120', 'important');
                 if (app.bringToTop) app.bringToTop();
             });
         } catch (e) {}
     });
 }
-
-// Default thread colour for newly created connections (light beige).
+ 
+ // Default thread colour for newly created connections (light beige).
 const LB_DEFAULT_THREAD_COLOR = '#e8dcc8';
 // Global string thickness scale — 30% thinner than the prior default (was ×0.8).
 const LB_THREAD_THICKNESS_SCALE = 0.56;

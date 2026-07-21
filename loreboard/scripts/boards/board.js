@@ -1426,7 +1426,8 @@ function initLoreBoard(theme) {
             });
             if (typeof window.drawDrawings === 'function') window.drawDrawings();
             if (typeof window.lbScheduleDrawThreads === 'function') window.lbScheduleDrawThreads();
-            else if (typeof window.drawThreads === 'function') window.drawThreads();
+            if (typeof window.lbRenderAttachLayer === 'function') window.lbRenderAttachLayer();
+            if (typeof window.lbRenderSeals === 'function') window.lbRenderSeals();
         }
         if (typeof lbApplyBoardTweaksToDOM === 'function') lbApplyBoardTweaksToDOM($('#lb-app-root'), store.boardTweaks, store.theme);
         if (typeof lbApplyToolbarVisibility === 'function') lbApplyToolbarVisibility($('#lb-app-root'));
@@ -12216,6 +12217,7 @@ function initLoreBoard(theme) {
                         if (typeof window.lbScheduleDrawThreads === 'function') window.lbScheduleDrawThreads();
                         else if (typeof window.drawThreads === 'function') window.drawThreads();
                         if (typeof window.lbRenderAttachLayer === 'function') window.lbRenderAttachLayer();
+                        if (typeof window.lbRenderSeals === 'function') window.lbRenderSeals();
                     }
                     if (typeof lbApplyToolbarVisibility === 'function') lbApplyToolbarVisibility($('#lb-app-root'));
                     if (typeof window.lbApplyPermissionReactiveUI === 'function') window.lbApplyPermissionReactiveUI();
@@ -12229,13 +12231,16 @@ function initLoreBoard(theme) {
                         x: it.x, y: it.y, w: it.w, h: it.h, rot: it.rot, z: it.z,
                         text: it.text, richText: it.richText, name: it.name,
                         customImg: it.customImg, faces: it.faces,
+                        isBlueprint: !!it.isBlueprint, blueprintModules: it.blueprintModules, blueprintBakedHtml: it.blueprintBakedHtml,
+                        seals: it.seals, locked: !!it.locked, dropComment: !!it.dropComment,
+                        font: it.font, fontSize: it.fontSize, color: it.color,
                         filter: it.filter, imgFilter: it.imgFilter,
                         bright: it.bright, cont: it.cont, sat: it.sat, exposure: it.exposure, tint: it.tint, style: it.style,
                         paper: it.paper, imgMode: it.imgMode, paperFade: it.paperFade, paperSoft: it.paperSoft, paperPrint: it.paperPrint, paperPaint: it.paperPaint, paperBrush: it.paperBrush,
                         scale: it.scale, panX: it.panX, panY: it.panY, panFracX: it.panFracX, panFracY: it.panFracY,
                         frameStyle: it.frameStyle, frameBorderColor: it.frameBorderColor, frameBorderWidth: it.frameBorderWidth, fullFeather: it.fullFeather,
                         flipped: !!it.flipped, faceSide: it.faceSide,
-                        isGM: !!it.isGM, ownerId: it.ownerId
+                        isGM: !!it.isGM, ownerId: it.ownerId, ownerColor: it.ownerColor
                     })));
                 } catch (e) { return ''; }
             }
@@ -14511,6 +14516,10 @@ function initLoreBoard(theme) {
                     if (window.lbPlacingSeal && e.button === 0) {
                         e.stopPropagation(); e.preventDefault();
                         window.lbSealPlaceLMB = true;
+                        let itemEl = (e.target.closest ? e.target.closest('.lb-item') : null) || (document.elementFromPoint(e.clientX, e.clientY)?.closest('.lb-item'));
+                        if (itemEl && !$(e.target).closest('.lb-seal').length) {
+                            lbPlaceSealOnItem(itemEl, e.clientX, e.clientY);
+                        }
                         return;
                     }
 

@@ -14377,6 +14377,39 @@ function initLoreBoard(theme) {
                     let itemEl = document.getElementById(itemId);
                     return itemEl ? itemEl.querySelector('.lb-pin') : null;
                 }
+                function lbResolveDocPlacementHost(clientX, clientY, originalTarget) {
+                    let direct = originalTarget && originalTarget.closest ? originalTarget.closest('.lb-item') : null;
+                    if (direct) return direct;
+
+                    let body = document.body;
+                    let hadSealClass = body.classList.contains('lb-placing-seal');
+                    let hadStampClass = body.classList.contains('lb-placing-stamp');
+                    if (hadSealClass) body.classList.remove('lb-placing-seal');
+                    if (hadStampClass) body.classList.remove('lb-placing-stamp');
+                    try {
+                        let stack = document.elementsFromPoint ? document.elementsFromPoint(clientX, clientY) : [document.elementFromPoint(clientX, clientY)];
+                        for (let el of stack) {
+                            let host = el && el.closest ? el.closest('.lb-item:not(.lb-midpin):not(.lb-player-pin)') : null;
+                            if (!host) continue;
+                            let item = store.items.find(i => i.id === host.id);
+                            if (item && !lbDocEmbedBlocked(item) && item.type !== 'board-comment') return host;
+                        }
+                    } finally {
+                        if (hadSealClass) body.classList.add('lb-placing-seal');
+                        if (hadStampClass) body.classList.add('lb-placing-stamp');
+                    }
+
+                    let candidates = (store.items || [])
+                        .filter(i => i && !i.stored && i.id && !lbDocEmbedBlocked(i) && i.type !== 'board-comment')
+                        .sort((a, b) => (b.z || 0) - (a.z || 0));
+                    for (let item of candidates) {
+                        let host = document.getElementById(item.id);
+                        if (!host) continue;
+                        let r = host.getBoundingClientRect();
+                        if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) return host;
+                    }
+                    return null;
+                }
                 let items = interactableAreas.find('.lb-item');
                 items.off('pointerdown pointerup pointerleave click dblclick.sealplace');
                 scrollArea.off('wheel pointermove pointerup pointerdown pointercancel pointerleave dblclick');
@@ -14471,9 +14504,11 @@ function initLoreBoard(theme) {
                         }
                         return;
                     }
-                    if (window.lbPlacingStamp && e.button === 0 && !$(e.target).closest('.lb-item, .lb-slide-menu, #lb-top-header-tools, #lb-top-toolbar, .lb-modern-dialog, #lb-myfiles-drawer, .lb-z-controls').length) {
+                    if (window.lbPlacingStamp && e.button === 0 && !$(e.target).closest('.lb-slide-menu, #lb-top-header-tools, #lb-top-toolbar, .lb-modern-dialog, #lb-myfiles-drawer, .lb-z-controls').length) {
                         e.stopPropagation(); e.preventDefault();
-                        lbPlaceStampAt(e.clientX, e.clientY);
+                        let stampHost = lbResolveDocPlacementHost(e.clientX, e.clientY, e.target);
+                        if (stampHost) lbPlaceStampOnItem(stampHost, e.clientX, e.clientY);
+                        else lbPlaceStampAt(e.clientX, e.clientY);
                         return;
                     }
                     if (activeTool === 'eraser' && e.button === 0) {
@@ -14516,7 +14551,7 @@ function initLoreBoard(theme) {
                     if (window.lbPlacingSeal && e.button === 0) {
                         e.stopPropagation(); e.preventDefault();
                         window.lbSealPlaceLMB = true;
-                        let itemEl = (e.target.closest ? e.target.closest('.lb-item') : null) || (document.elementFromPoint(e.clientX, e.clientY)?.closest('.lb-item'));
+                        let itemEl = lbResolveDocPlacementHost(e.clientX, e.clientY, e.target);
                         if (itemEl && !$(e.target).closest('.lb-seal').length) {
                             lbPlaceSealOnItem(itemEl, e.clientX, e.clientY);
                         }

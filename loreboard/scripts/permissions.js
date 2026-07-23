@@ -565,7 +565,7 @@ function lbUvLampUsesMagicAudio(store, themeId) {
 function lbPermsFromPreset(presetId) {
     if (presetId === 'godmode') return lbPermsFromPreset('coarchivist');
     let p = LB_ROLE_PRESETS[presetId];
-    if (!p) return lbPermsFromPreset('investigator');
+    if (!p) return lbPermsFromPreset('observer');
     let out = {};
     LB_PERM_KEYS.forEach(k => { out[k] = !!(p.perms && p.perms[k]); });
     return out;
@@ -585,7 +585,7 @@ function lbCanPlaceMagicInk() {
     return game.user.isGM || lbUserHasPerm('placeMagicInk');
 }
 function lbMigrateLegacyPermissions(legacy) {
-    if (!legacy) return lbPermsFromPreset('investigator');
+    if (!legacy) return lbPermsFromPreset('observer');
     if (legacy.useLoupe !== undefined && legacy.moveOthers === undefined && legacy.moveItems === undefined) {
         return Object.assign(lbPermsFromPreset('observer'), legacy);
     }

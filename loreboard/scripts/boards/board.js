@@ -1135,8 +1135,8 @@ function initLoreBoard(theme) {
         let users = (game.users?.contents || game.users || []).filter(u => !u.isGM);
         let permTip = (key) => `<span class="lb-perm-tip" data-tip="${(LB_PERM_TOOLTIPS[key] || key).replace(/"/g, '&quot;')}">?</span>`;
         let permRows = users.map(u => {
-            let role = store.playerRoles[u.id] || { preset: 'investigator', permissions: lbPermsFromPreset('investigator') };
-            if (!role.permissions) role.permissions = lbPermsFromPreset(role.preset || 'investigator');
+            let role = store.playerRoles[u.id] || { preset: 'observer', permissions: lbPermsFromPreset('observer') };
+            if (!role.permissions) role.permissions = lbPermsFromPreset(role.preset || 'observer');
             let preset = role.preset === 'custom' ? 'custom' : lbPermsMatchPreset(role.permissions);
             if (preset !== 'custom') role.preset = preset;
             let opts = Object.keys(LB_ROLE_PRESETS).map(id =>
@@ -11426,7 +11426,7 @@ function initLoreBoard(theme) {
                                 let tfSize = faceData.fontSize || item.fontSize || 16;
                                 let tfColor = faceData.color || item.color || '#111111';
                                 let tfHtml = faceData.richText || (faceData.text ? String(faceData.text).replace(/\n/g, '<br>') : '');
-                                let canEdit = checkPerm('draw') || checkPerm('editItems');
+                                let canEdit = lbCanEditItem(item);
                                 return `<div class="lb-item-content lb-text-frame-item" style="width:100%;height:100%;pointer-events:auto;border:none;outline:none;box-shadow:none;background:transparent;">
                                 <div class="lb-text-frame-edit" contenteditable="${canEdit ? 'true' : 'false'}" spellcheck="true" style="width:100%;height:100%;outline:none;border:none;box-shadow:none;background:transparent;overflow:auto;font-family:${tfFont};font-size:${tfSize}px;color:${tfColor};line-height:1.45;padding:2px 4px;box-sizing:border-box;white-space:pre-wrap;word-wrap:break-word;">${tfHtml}</div></div>`;
                             }

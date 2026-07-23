@@ -12192,7 +12192,6 @@ function initLoreBoard(theme) {
                         prevStored !== nextStored ||
                         prevTweaksSig !== tweaksSig ||
                         prevItemsSig !== itemsSig ||
-                        prevDrawingsSig !== drawingsSig ||
                         prevThreadsSig !== threadsSig;
                     let busy = window.lbBoardIsBusy();
                     if (busy) {
